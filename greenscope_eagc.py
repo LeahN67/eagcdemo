@@ -23,101 +23,275 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Force custom CSS with !important and more specific selectors
+# Enhanced CSS for modern UI
 st.markdown("""
 <style>
-    /* Force override Streamlit's defaults */
-    .stApp header {
-        visibility: hidden;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
     }
     
-    div[data-testid="stToolbar"] {
-        visibility: hidden;
+    .main {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
     
-    .main .block-container {
-        padding-top: 2rem;
+        .header-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 2.5rem 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.25);
+        border: 1px solid #334155;
+    }
+
+    .header-title {
+        font-size: 2.8rem;  /* Adjusted for longer title */
+        font-weight: 700;
+        color: #f8fafc;
+        margin: 0;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header-title .brand {
+        color: #4ade80;  /* Bright green */
+        font-weight: 800;
+    }
+
+    .header-subtitle {
+        font-size: 1.25rem;
+        color: #cbd5e1;
+        margin-top: 0.75rem;
+        font-weight: 400;
+    }    
+        .metric-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
     
-    /* Big title with forced styling */
-    .big-title {
-        font-size: 5rem !important;
-        font-weight: 700 !important;
-        color: #1E3A8A !important;
-        margin-bottom: 1rem !important;
-        line-height: 1.2 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
     }
     
-    /* Big subtitle with forced styling */
-    .big-subtitle {
-        font-size: 2.5rem !important;
-        color: #059669 !important;
-        margin-bottom: 3rem !important;
-        font-weight: 500 !important;
-        line-height: 1.3 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    .metric-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 600;
     }
     
-    /* Alternative: use HTML directly */
-    h1.custom-title {
-        font-size: 5rem;
-        color: #1E3A8A;
+    .metric-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0.25rem;
+    }
+    
+    .metric-delta {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .section-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .insight-box {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-left: 4px solid #059669;
+        padding: 1.25rem;
+        border-radius: 0 12px 12px 0;
+        margin: 1rem 0;
+    }
+    
+    .warning-box {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-left: 4px solid #f59e0b;
+        padding: 1.25rem;
+        border-radius: 0 12px 12px 0;
+        margin: 1rem 0;
+    }
+    
+    .scenario-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .scenario-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    
+    .scenario-card.active {
+        border-color: #059669;
+        background: #f0fdf4;
+    }
+    
+    .stButton>button {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    }
+    
+    .stSelectbox>div>div, .stSlider>div {
+        background: white;
+        border-radius: 8px;
+    }
+    
+    div[data-testid="stRadio"] > div {
+        background: white;
+        padding: 0.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Create sample market data
-@st.cache_data
-def create_market_data(crop="Maize", country="Kenya", seed=42, months=36):
+# CRITICAL FIX: Remove @st.cache_data to ensure fresh data generation
+# Or use cache with parameters that change
+def create_market_data(crop="Maize", country="Kenya", seed=None, months=36):
+    """Generate market data with proper parameter sensitivity"""
+    # Use hash of parameters as seed for consistency but change when params change
+    if seed is None:
+        seed = hash(f"{crop}_{country}_{datetime.now().strftime('%Y%m%d')}") % (2**32)
     np.random.seed(seed)
+    
     dates = pd.date_range(start='2022-01-01', periods=months, freq='M')
     
-    # Base parameters vary by crop
+    # Base parameters vary significantly by crop
     crop_params = {
-        "Maize": {"base_price": 2500, "volatility": 100, "supply_sensitivity": 15},
-        "Beans": {"base_price": 4000, "volatility": 150, "supply_sensitivity": 25},
-        "Wheat": {"base_price": 3500, "volatility": 120, "supply_sensitivity": 20}
+        "Maize": {
+            "base_price": 2500, 
+            "volatility": 150, 
+            "supply_sensitivity": 15,
+            "seasonality_amp": 200,
+            "color": "#eab308"
+        },
+        "Beans": {
+            "base_price": 4500, 
+            "volatility": 350, 
+            "supply_sensitivity": 30,
+            "seasonality_amp": 400,
+            "color": "#8b5cf6"
+        },
+        "Wheat": {
+            "base_price": 3200, 
+            "volatility": 180, 
+            "supply_sensitivity": 20,
+            "seasonality_amp": 250,
+            "color": "#06b6d4"
+        }
     }
     
-    # Country modifiers
+    # Country modifiers with meaningful differences
     country_params = {
-        "Kenya": {"conflict_impact": 1.0, "drought_freq": 0.2},
-        "Uganda": {"conflict_impact": 0.6, "drought_freq": 0.15},
-        "Tanzania": {"conflict_impact": 0.4, "drought_freq": 0.1}
+        "Kenya": {
+            "conflict_impact": 1.0, 
+            "drought_freq": 0.25,
+            "export_disruption": 0.15,
+            "transport_premium": 1.0
+        },
+        "Uganda": {
+            "conflict_impact": 0.4, 
+            "drought_freq": 0.15,
+            "export_disruption": 0.25,
+            "transport_premium": 0.85
+        },
+        "Tanzania": {
+            "conflict_impact": 0.3, 
+            "drought_freq": 0.12,
+            "export_disruption": 0.10,
+            "transport_premium": 0.90
+        }
     }
     
     params = crop_params.get(crop, crop_params["Maize"])
     c_params = country_params.get(country, country_params["Kenya"])
     
-    # Market factors that affect prices
-    harvest = 100 + 20 * np.sin(np.arange(months) * 2 * np.pi / 12) + np.random.normal(0, 10, months)
-    export_stop = np.random.choice([0, 1], size=months, p=[0.85, 0.15])
-    conflict = np.clip(np.cumsum(np.random.normal(0.02, 0.1, months)) + 2 * c_params["conflict_impact"], 0, 10)
+    # Generate market factors with crop/country specific patterns
+    t = np.arange(months)
+    
+    # Seasonality varies by crop
+    seasonality = params["seasonality_amp"] * np.sin(2 * np.pi * t / 12 + np.pi/4)
+    
+    # Harvest cycles
+    harvest = 100 + 30 * np.sin(2 * np.pi * t / 12) + np.random.normal(0, 15, months)
+    
+    # Export disruptions - country specific
+    export_stop = np.random.choice([0, 1], size=months, p=[1-c_params["export_disruption"], c_params["export_disruption"]])
+    
+    # Conflict - country specific
+    conflict_base = np.cumsum(np.random.normal(0.01, 0.08, months))
+    conflict = np.clip(conflict_base * c_params["conflict_impact"] + 1, 0, 10)
+    
+    # Drought - country specific
     drought = np.random.choice([0, 1], size=months, p=[1-c_params["drought_freq"], c_params["drought_freq"]])
     
-    # How these factors connect
-    available_supply = harvest * 0.6 + (1 - export_stop) * 30 - conflict * 2
-    available_supply = np.clip(available_supply, 20, 150)
+    # Supply calculation with crop-specific sensitivity
+    available_supply = (harvest * 0.6 + 
+                       (1 - export_stop) * 40 * c_params["transport_premium"] - 
+                       conflict * 3 * c_params["conflict_impact"] +
+                       np.random.normal(0, 10, months))
+    available_supply = np.clip(available_supply, 15, 180)
     
-    # Calculate price based on supply and other factors
-    base_price = params["base_price"]
-    price = (base_price 
-             - params["supply_sensitivity"] * (available_supply - 80)
-             + 50 * export_stop
-             + 30 * conflict
-             + 200 * drought
+    # Price calculation with full parameter sensitivity
+    base_price = params["base_price"] * c_params["transport_premium"]
+    
+    price = (base_price + seasonality
+             - params["supply_sensitivity"] * (available_supply - 80) / 5
+             + 80 * export_stop
+             + 25 * conflict
+             + 300 * drought
              + np.random.normal(0, params["volatility"], months))
     
-    # Track reserve stocks
+    # Ensure realistic bounds
+    price = np.clip(price, base_price * 0.6, base_price * 2.0)
+    
+    # Reserves - respond to price spikes
     reserve_stock = np.zeros(months)
     reserve_stock[0] = 500
     for i in range(1, months):
-        release = 50 if price[i] > base_price * 1.3 else 0
-        reserve_stock[i] = np.clip(reserve_stock[i-1] - release + 20, 0, 1000)
+        # Release when price > 130% of base
+        release_trigger = price[i] > base_price * 1.3
+        release_amount = 60 if release_trigger else 0
+        # Replenishment varies by country stability
+        replenishment = 25 * (1 - 0.1 * c_params["conflict_impact"])
+        reserve_stock[i] = np.clip(reserve_stock[i-1] - release_amount + replenishment, 100, 1200)
     
-    # Food security measure (higher = worse)
-    food_security_risk = np.clip(30 + 0.02 * price - 0.05 * reserve_stock + np.random.normal(0, 3, months), 0, 100)
+    # Food security risk - composite index
+    price_stress = (price - base_price) / base_price * 50
+    supply_stress = np.maximum(0, (80 - available_supply)) * 0.5
+    conflict_stress = conflict * 3
+    reserve_buffer = np.minimum(0, (reserve_stock - 300) / 10)
+    
+    food_security_risk = np.clip(20 + price_stress + supply_stress + conflict_stress + reserve_buffer, 0, 100)
     
     return pd.DataFrame({
         'date': dates,
@@ -128,524 +302,592 @@ def create_market_data(crop="Maize", country="Kenya", seed=42, months=36):
         'available_supply': available_supply,
         'market_price': price,
         'reserve_stock': reserve_stock,
-        'food_security_risk': food_security_risk
-    })
+        'food_security_risk': food_security_risk,
+        'crop': crop,
+        'country': country,
+        'base_price': base_price
+    }), params
 
-# Page header - Using HTML with inline styles for maximum compatibility
-st.markdown("""
-<div style="margin-bottom: 3rem;">
-    <h1 style="
-        font-size: 5rem;
-        font-weight: 700;
-        color: #1E3A8A;
-        margin-bottom: 1rem;
-        line-height: 1.2;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    ">🌾 GreenScope Analytics</h1>
-    <p style="
-        font-size: 2.5rem;
-        color: #059669;
-        margin-bottom: 0;
-        font-weight: 500;
-        line-height: 1.3;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    ">Helping EAGC understand markets and make smart decisions</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Alternative: Use st.title with custom sizing
-# st.title("🌾 GreenScope Analytics")
-# st.markdown('<p style="font-size: 2.5rem; color: #059669; margin-top: -1rem;">Helping EAGC understand markets and make smart decisions</p>', unsafe_allow_html=True)
-
-# Sidebar controls
-with st.sidebar:
-    st.header("Settings")
+# CRITICAL FIX: Scenario-aware data generation
+def apply_scenario_impact(data, scenario, months_ahead=6):
+    """Apply scenario-specific impacts to price projections"""
+    last_price = data['market_price'].iloc[-1]
+    last_date = data['date'].iloc[-1]
     
-    st.subheader("Market Selection")
-    country = st.selectbox("Country", ["Kenya", "Uganda", "Tanzania"])
-    crop = st.selectbox("Crop", ["Maize", "Beans", "Wheat"])
-    
-    st.subheader("Test Scenario")
-    action = st.selectbox("What should we test?", [
-        "Do nothing (see what happens)",
-        "Release grain reserves",
-        "Fix trade routes",
-        "Do both (reserves + routes)"
-    ])
-    
-    st.subheader("Time Period")
-    months_ahead = st.slider("Months to look ahead", 3, 12, 6)
-    
-    st.markdown("---")
-    st.info(f"Currently viewing: {crop} prices in {country}")
-
-# Load data based on selections
-data = create_market_data(crop=crop, country=country)
-
-# Calculate scenario-specific metrics
-def get_scenario_metrics(crop, country, action):
-    """Calculate metrics based on crop, country, and action"""
-    base_metrics = {
-        "Maize": {"price": 3000, "volatility": "medium"},
-        "Beans": {"price": 4500, "volatility": "high"},
-        "Wheat": {"price": 3800, "volatility": "medium"}
+    # Scenario impact definitions
+    scenario_impacts = {
+        "Do nothing (see what happens)": {
+            'price_modifier': 1.0,
+            'trend': 0.015,  # Slight upward drift
+            'volatility': 0.08,
+            'description': 'Market continues current trajectory'
+        },
+        "Release grain reserves": {
+            'price_modifier': 0.92,  # 8% reduction
+            'trend': 0.005,
+            'volatility': 0.05,
+            'description': 'Strategic reserve release stabilizes prices'
+        },
+        "Fix trade routes": {
+            'price_modifier': 0.85,  # 15% reduction
+            'trend': 0.0,
+            'volatility': 0.04,
+            'description': 'Improved logistics reduce transport costs'
+        },
+        "Do both (reserves + routes)": {
+            'price_modifier': 0.74,  # 26% reduction
+            'trend': -0.005,
+            'volatility': 0.03,
+            'description': 'Combined intervention maximizes impact'
+        }
     }
     
+    impact = scenario_impacts.get(scenario, scenario_impacts["Do nothing (see what happens)"])
+    
+    # Generate future dates
+    future_dates = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=months_ahead, freq='M')
+    
+    # Generate scenario-specific price path
+    np.random.seed(hash(scenario) % 2**32)
+    prices = []
+    current_price = last_price * impact['price_modifier']
+    
+    for i in range(months_ahead):
+        # Mean reversion toward base
+        base = data['base_price'].iloc[0]
+        reversion = 0.1 * (base - current_price) / base
+        trend = impact['trend']
+        shock = np.random.normal(0, impact['volatility'])
+        
+        current_price = current_price * (1 + reversion + trend + shock)
+        prices.append(current_price)
+    
+    return future_dates, np.array(prices), impact
+
+def get_scenario_metrics(crop, country, scenario):
+    """Calculate metrics with crop and country sensitivity"""
+    # Base metrics by crop
+    crop_base = {
+        "Maize": {"price": 2800, "intervention_cost": 1.0},
+        "Beans": {"price": 4800, "intervention_cost": 1.3},
+        "Wheat": {"price": 3400, "intervention_cost": 1.1}
+    }
+    
+    # Country cost adjustments
     country_factor = {
         "Kenya": 1.0,
         "Uganda": 0.85,
         "Tanzania": 0.90
     }
     
-    base = base_metrics.get(crop, base_metrics["Maize"])
+    base = crop_base.get(crop, crop_base["Maize"])
     factor = country_factor.get(country, 1.0)
-    base_price = base["price"] * factor
     
-    # Action effects vary by crop and country
-    if action == "Do nothing (see what happens)":
-        return {
+    # Scenario definitions with crop-specific impacts
+    scenarios = {
+        "Do nothing (see what happens)": {
             'price_drop': 0, 
             'cost': 0, 
-            'works': 0,
+            'confidence': 95,
             'people_helped': 0,
-            'description': f"{crop} prices continue current trend in {country}"
+            'timeline': '-',
+            'description': f'{crop} prices follow market forces in {country}'
+        },
+        "Release grain reserves": {
+            'price_drop': 8 if crop == "Maize" else 10 if crop == "Wheat" else 12, 
+            'cost': int(150 * factor * base["intervention_cost"]), 
+            'confidence': 85,
+            'people_helped': round(1.2 * factor, 1),
+            'timeline': '2-3 weeks',
+            'description': f'Strategic {crop.lower()} reserve release to stabilize {country} market'
+        },
+        "Fix trade routes": {
+            'price_drop': 15 if crop == "Maize" else 18 if crop == "Wheat" else 20, 
+            'cost': int(80 * factor * base["intervention_cost"]), 
+            'confidence': 82,
+            'people_helped': round(1.8 * factor, 1),
+            'timeline': '4-6 weeks',
+            'description': f'Infrastructure investment to improve {crop.lower()} transport in {country}'
+        },
+        "Do both (reserves + routes)": {
+            'price_drop': 26 if crop == "Maize" else 30 if crop == "Wheat" else 35, 
+            'cost': int(200 * factor * base["intervention_cost"]), 
+            'confidence': 78,
+            'people_helped': round(2.5 * factor, 1),
+            'timeline': '6-8 weeks',
+            'description': f'Comprehensive {crop.lower()} market intervention in {country}'
         }
-    elif action == "Release grain reserves":
-        return {
-            'price_drop': 8 if crop == "Maize" else 12 if crop == "Beans" else 10, 
-            'cost': int(150 * factor), 
-            'works': 65,
-            'people_helped': int(1.5 * factor),
-            'description': f"Release {crop} reserves to stabilize {country} market"
-        }
-    elif action == "Fix trade routes":
-        return {
-            'price_drop': 15 if crop == "Maize" else 18 if crop == "Beans" else 16, 
-            'cost': int(80 * factor), 
-            'works': 80,
-            'people_helped': int(2.0 * factor),
-            'description': f"Improve {crop} transport corridors to {country}"
-        }
-    else:  # Do both
-        return {
-            'price_drop': 26 if crop == "Maize" else 32 if crop == "Beans" else 28, 
-            'cost': int(200 * factor), 
-            'works': 92,
-            'people_helped': int(2.3 * factor),
-            'description': f"Combined approach for maximum {crop} price stability in {country}"
-        }
-
-# Get current scenario metrics
-current_metrics = get_scenario_metrics(crop, country, action)
-
-# Main report selector
-st.markdown("---")
-report_choice = st.radio(
-    "What do you want to know?",
-    ["📊 Summary Report", "🔍 Why are prices changing?", "🔮 What if we take action?", "🎯 What's the best move?", "📈 How accurate are we?"],
-    horizontal=True
-)
-
-# NEW: Summary Report (ties everything together)
-if "Summary Report" in report_choice:
-    st.header("📊 Executive Summary")
-    st.markdown(f"*Quick overview of {crop} market in {country}*")
-    
-    # Key numbers at a glance
-    st.subheader("Current Situation")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric(f"{crop} Price", f"KES {data['market_price'].iloc[-1]:.0f}", "Last month")
-    with col2:
-        trend = "Up 6.8%" if data['market_price'].iloc[-1] > data['market_price'].iloc[-6] else "Down"
-        st.metric("Price Trend", trend, "vs 6 months ago")
-    with col3:
-        risk_level = "High" if data['food_security_risk'].iloc[-1] > 50 else "Medium" if data['food_security_risk'].iloc[-1] > 30 else "Low"
-        st.metric("Food Security Risk", risk_level, f"{data['food_security_risk'].iloc[-1]:.0f}/100")
-    with col4:
-        st.metric("Reserve Stocks", f"{data['reserve_stock'].iloc[-1]:.0f}k tons", "Available")
-    
-    st.markdown("---")
-    
-    # What's happening
-    st.subheader("What's Happening?")
-    causes = []
-    if data['export_stop'].iloc[-3:].mean() > 0.3:
-        causes.append("Export restrictions in neighboring countries")
-    if data['drought'].iloc[-6:].mean() > 0.2:
-        causes.append("Poor rainfall affecting harvests")
-    if data['conflict'].iloc[-1] > 5:
-        causes.append("Regional conflict increasing transport costs")
-    if data['available_supply'].iloc[-1] < 60:
-        causes.append("Low supply in local markets")
-    
-    if causes:
-        for cause in causes[:3]:
-            st.write(f"• {cause}")
-    else:
-        st.write("• Market conditions are relatively stable")
-    
-    # What we're recommending
-    st.subheader("Our Recommendation")
-    
-    # Find best action
-    all_options = {
-        "Do nothing": get_scenario_metrics(crop, country, "Do nothing (see what happens)"),
-        "Release reserves": get_scenario_metrics(crop, country, "Release grain reserves"),
-        "Fix trade routes": get_scenario_metrics(crop, country, "Fix trade routes"),
-        "Do both": get_scenario_metrics(crop, country, "Do both (reserves + routes)")
     }
     
-    best_option = max(all_options.items(), key=lambda x: x[1]['works'])
-    
-    rec_col1, rec_col2 = st.columns([2, 1])
-    with rec_col1:
-        st.success(f"**Recommended: {best_option[0]}**")
-        st.write(f"• Prices drop by {best_option[1]['price_drop']}%")
-        st.write(f"• Helps {best_option[1]['people_helped']:.1f} million people")
-        st.write(f"• Costs KES {best_option[1]['cost']} million")
-        st.write(f"• {best_option[1]['works']}% confidence this works")
-    
-    with rec_col2:
-        st.info("**Why this works:**")
-        st.write(best_option[1]['description'])
-    
-    st.markdown("---")
-    
-    # Quick price chart
-    st.subheader(f"{crop} Price Trend")
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(data['date'], data['market_price'], linewidth=2.5, color='#2E7D32', label=f'{crop} Price')
-    ax.axhline(y=data['market_price'].mean() * 1.3, color='red', linestyle='--', alpha=0.7, label='Crisis Level')
-    ax.fill_between(data['date'], data['market_price'], data['market_price'].mean() * 1.3, 
-                    where=(data['market_price'] > data['market_price'].mean() * 1.3), alpha=0.3, color='red')
-    ax.set_ylabel(f'Price (KES per {crop} bag)')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    st.pyplot(fig)
-    
-    # Next steps
-    st.subheader("Next Steps")
-    st.write("1. Review detailed analysis in other tabs")
-    st.write("2. Test different scenarios using the sidebar")
-    st.write("3. Contact GreenScope to implement this for real")
+    return scenarios.get(scenario, scenarios["Do nothing (see what happens)"])
 
-# Report 1: Why prices are changing
-elif "Why are prices changing" in report_choice:
-    st.header(f"🔍 Understanding {crop} Price Changes in {country}")
-    st.markdown("*Finding the real reasons behind market movements*")
+# Header
+st.markdown("""
+<div class="header-container">
+    <h1 class="header-title"><span class="brand">🌾 GreenScope</span> Analytics Data Infrastructure</h1>
+    <p class="header-subtitle">Market Intelligence for Smarter Agricultural Decisions</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Sidebar with improved styling
+with st.sidebar:
+    st.markdown("### 🎯 Configuration")
     
-    # Key numbers
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric(f"Current {crop} Price", f"KES {data['market_price'].iloc[-1]:.0f}", "Last reading")
-    with col2:
-        risk = data['food_security_risk'].iloc[-1]
-        risk_text = "High" if risk > 50 else "Medium" if risk > 30 else "Low"
-        st.metric("Food Security Risk", risk_text, f"{risk:.1f}/100")
-    with col3:
-        st.metric("Reserve Stocks", f"{data['reserve_stock'].iloc[-1]:.0f}k tons", "Available")
+    st.markdown("**Market Selection**")
+    country = st.selectbox(
+        "Country", 
+        ["Kenya", "Uganda", "Tanzania"],
+        help="Select focus country for market analysis"
+    )
+    
+    crop = st.selectbox(
+        "Crop", 
+        ["Maize", "Beans", "Wheat"],
+        help="Select commodity for price analysis"
+    )
+    
+    st.markdown("---")
+    st.markdown("**Scenario Testing**")
+    
+    scenario = st.selectbox(
+        "Test Intervention Scenario",
+        [
+            "Do nothing (see what happens)",
+            "Release grain reserves",
+            "Fix trade routes",
+            "Do both (reserves + routes)"
+        ],
+        help="See how different actions affect future prices"
+    )
+    
+    months_ahead = st.slider(
+        "Forecast Months", 
+        3, 12, 6,
+        help="How far ahead to project"
+    )
     
     st.markdown("---")
     
-    # Price chart
-    st.subheader(f"{crop} Price Trend")
+    # Live indicator
+    st.markdown(f"""
+    <div style="background: #f0fdf4; border-radius: 8px; padding: 12px; border: 1px solid #86efac;">
+        <div style="font-size: 0.75rem; color: #166534; font-weight: 600;">ACTIVE CONFIGURATION</div>
+        <div style="font-size: 0.875rem; color: #1f2937; margin-top: 4px;">
+            📍 {country}<br>
+            🌾 {crop}<br>
+            📊 {scenario}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Generate data with current parameters
+data, crop_params = create_market_data(crop=crop, country=country)
+current_metrics = get_scenario_metrics(crop, country, scenario)
+
+# Navigation
+st.markdown("---")
+report_choice = st.radio(
+    "Select Analysis View",
+    ["📊 Market Overview", "🔍 Price Drivers", "💡 Scenario Comparison", "📈 Performance Tracking"],
+    horizontal=True,
+    label_visibility="collapsed"
+)
+
+# COLOR THEME based on crop
+crop_colors = {
+    "Maize": {"primary": "#eab308", "secondary": "#fef08a", "accent": "#a16207"},
+    "Beans": {"primary": "#8b5cf6", "secondary": "#ddd6fe", "accent": "#6d28d9"},
+    "Wheat": {"primary": "#06b6d4", "secondary": "#cffafe", "accent": "#0891b2"}
+}
+theme = crop_colors.get(crop, crop_colors["Maize"])
+
+# VIEW 1: Market Overview
+if "Market Overview" in report_choice:
+    st.markdown('<div class="section-header">Market Overview</div>', unsafe_allow_html=True)
+    
+    # Key metrics with crop-specific context
+    cols = st.columns(4)
+    
+    current_price = data['market_price'].iloc[-1]
+    price_6m_ago = data['market_price'].iloc[-6]
+    price_change = ((current_price / price_6m_ago) - 1) * 100
+    
+    with cols[0]:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Current {crop} Price</div>
+            <div class="metric-value" style="color: {theme['primary']}">KES {current_price:,.0f}</div>
+            <div class="metric-delta" style="color: {'#ef4444' if price_change > 10 else '#22c55e' if price_change < -5 else '#64748b'}">
+                {price_change:+.1f}% vs 6mo ago
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[1]:
+        supply_status = "Tight" if data['available_supply'].iloc[-1] < 50 else "Moderate" if data['available_supply'].iloc[-1] < 90 else "Adequate"
+        supply_color = "#ef4444" if supply_status == "Tight" else "#f59e0b" if supply_status == "Moderate" else "#22c55e"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Supply Status</div>
+            <div class="metric-value" style="color: {supply_color}">{supply_status}</div>
+            <div class="metric-delta" style="color: #64748b">{data['available_supply'].iloc[-1]:.0f}% of normal</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[2]:
+        risk = data['food_security_risk'].iloc[-1]
+        risk_level = "High" if risk > 60 else "Elevated" if risk > 40 else "Moderate" if risk > 25 else "Low"
+        risk_color = "#dc2626" if risk > 60 else "#ea580c" if risk > 40 else "#ca8a04" if risk > 25 else "#16a34a"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Food Security Risk</div>
+            <div class="metric-value" style="color: {risk_color}">{risk_level}</div>
+            <div class="metric-delta" style="color: #64748b">Score: {risk:.0f}/100</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[3]:
+        reserves = data['reserve_stock'].iloc[-1]
+        reserve_months = reserves / 50  # Assuming 50k MT monthly need
+        reserve_color = "#dc2626" if reserve_months < 3 else "#ea580c" if reserve_months < 6 else "#16a34a"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Strategic Reserves</div>
+            <div class="metric-value" style="color: {reserve_color}">{reserves:.0f}k MT</div>
+            <div class="metric-delta" style="color: #64748b">~{reserve_months:.1f} months coverage</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Alerts section
+    alerts = []
+    if price_change > 15:
+        alerts.append(("Price Spike", f"{crop} prices up {price_change:.1f}% in 6 months", "warning"))
+    if risk > 55:
+        alerts.append(("Food Security", "Risk elevated—intervention may be needed", "alert"))
+    if reserve_months < 4:
+        alerts.append(("Low Reserves", "Strategic buffer below comfort level", "warning"))
+    if data['export_stop'].iloc[-3:].mean() > 0.4:
+        alerts.append(("Trade Disruption", "Export restrictions affecting supply", "warning"))
+    
+    if alerts:
+        st.markdown('<div class="section-header">Active Alerts</div>', unsafe_allow_html=True)
+        for title, message, level in alerts[:3]:
+            if level == "alert":
+                st.error(f"**{title}:** {message}")
+            else:
+                st.warning(f"**{title}:** {message}")
+    else:
+        st.success("✓ All market indicators within normal parameters")
+    
+    # Price chart with scenario overlay
+    st.markdown('<div class="section-header">Price Trajectory & Scenario Impact</div>', unsafe_allow_html=True)
+    
     fig, ax = plt.subplots(figsize=(12, 5))
-    ax.plot(data['date'], data['market_price'], linewidth=2.5, color='#2E7D32', label=f'{crop} Price')
-    crisis_level = data['market_price'].mean() * 1.3
-    ax.axhline(y=crisis_level, color='red', linestyle='--', alpha=0.7, label='Crisis Level')
-    ax.fill_between(data['date'], data['market_price'], crisis_level, 
-                    where=(data['market_price'] > crisis_level), alpha=0.3, color='red')
-    ax.set_ylabel(f'Price (KES per {crop} bag)')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    
+    # Historical data
+    ax.plot(data['date'], data['market_price'], 
+            linewidth=2.5, color=theme['primary'], 
+            label=f'Historical {crop} Price', alpha=0.9)
+    
+    # Add trend line
+    z = np.polyfit(range(len(data)), data['market_price'], 1)
+    p = np.poly1d(z)
+    ax.plot(data['date'], p(range(len(data))), 
+            "--", color=theme['accent'], linewidth=1.5, alpha=0.6, label='Trend')
+    
+    # Scenario projection
+    future_dates, future_prices, impact = apply_scenario_impact(data, scenario, months_ahead)
+    
+    ax.plot(future_dates, future_prices, 
+            linewidth=3, color='#059669' if 'both' in scenario else '#3b82f6' if scenario != "Do nothing (see what happens)" else '#ef4444',
+            linestyle='--', marker='o', markersize=6,
+            label=f'Scenario: {scenario}')
+    
+    # Reference lines
+    base_price = data['base_price'].iloc[0]
+    ax.axhline(y=base_price * 1.3, color='#dc2626', linestyle=':', alpha=0.7, label='Crisis threshold')
+    ax.axhline(y=base_price, color='#64748b', linestyle=':', alpha=0.5, label='Long-term average')
+    
+    # Fill zones
+    ax.fill_between(data['date'], data['market_price'].min() * 0.8, base_price * 1.3, 
+                    alpha=0.05, color='#22c55e')
+    
+    ax.set_ylabel(f'Price (KES per 90kg {crop.lower()} bag)', fontsize=11)
+    ax.set_xlabel('Date', fontsize=11)
+    ax.legend(loc='best', framealpha=0.95)
+    ax.grid(True, alpha=0.3, linestyle='-')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    plt.tight_layout()
     st.pyplot(fig)
     
-    # What caused this?
-    st.subheader("What's Really Causing This?")
+    # Scenario impact summary
+    if scenario != "Do nothing (see what happens)":
+        price_reduction = (1 - future_prices[0] / data['market_price'].iloc[-1]) * 100
+        st.markdown(f"""
+        <div class="insight-box">
+            <strong>Scenario Impact: {scenario}</strong><br>
+            Projected price reduction: <strong>{price_reduction:.1f}%</strong> in first month<br>
+            {impact['description']}<br>
+            Confidence: {current_metrics['confidence']}% | Timeline: {current_metrics['timeline']}
+        </div>
+        """, unsafe_allow_html=True)
+
+# VIEW 2: Price Drivers
+elif "Price Drivers" in report_choice:
+    st.markdown(f'<div class="section-header">What&apos;s Driving {crop} Prices in {country}?</div>', unsafe_allow_html=True)
+    
+    # Dynamic causal factors based on data
+    factors = []
+    
+    # Calculate actual contributions from data
+    export_impact = data['export_stop'].iloc[-6:].mean() * 35
+    drought_impact = data['drought'].iloc[-6:].mean() * 25
+    conflict_impact = min(data['conflict'].iloc[-1] / 10 * 20, 25)
+    supply_gap = max(0, (80 - data['available_supply'].iloc[-1]) / 80 * 20)
+    
+    if export_impact > 10:
+        factors.append(("Export Restrictions", f"Regional trade barriers affecting {crop.lower()} flows", export_impact, "#dc2626"))
+    if drought_impact > 5:
+        factors.append(("Weather Stress", "Below-normal rainfall reducing yield expectations", drought_impact, "#ea580c"))
+    if conflict_impact > 8:
+        factors.append(("Logistics Disruption", "Transport corridor instability increasing costs", conflict_impact, "#ca8a04"))
+    if supply_gap > 10:
+        factors.append(("Supply Shortfall", "Low stock levels relative to demand", supply_gap, "#eab308"))
+    
+    if not factors:
+        factors.append(("Stable Conditions", "Standard seasonal patterns, no major disruptions", 5, "#16a34a"))
+    
+    # Display factors
+    cols = st.columns(len(factors))
+    for i, (col, (name, desc, impact, color)) in enumerate(zip(cols, factors)):
+        with col:
+            st.markdown(f"""
+            <div style="background: white; border-radius: 12px; padding: 1.25rem; border-top: 4px solid {color}; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">{['🚫','🌤️','⚠️','📉','✓'][i]}</div>
+                <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">{name}</div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">{desc}</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: {color};">{impact:.0f}%</div>
+                <div style="font-size: 0.75rem; color: #9ca3af;">estimated impact</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Causal diagram
+    st.markdown('<div class="section-header">How Factors Connect</div>', unsafe_allow_html=True)
+    
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        # Simple cause-and-effect diagram
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 7))
         G = nx.DiGraph()
-        connections = [
-            ("Drought", "Low Supply", 0.7),
-            ("Export Ban", "Low Supply", 0.8),
-            ("Conflict", "High Transport Cost", 0.6),
-            ("Low Supply", "High Prices", 0.9),
-            ("High Transport Cost", "High Prices", 0.5),
-            ("High Prices", "Food Insecurity", 0.75)
-        ]
-        for cause, effect, strength in connections:
-            G.add_edge(cause, effect, weight=strength)
         
-        pos = nx.spring_layout(G, seed=42, k=2)
-        nx.draw(G, pos, with_labels=True, node_color='#1976D2', 
-                node_size=3000, font_size=9, font_color='white',
-                font_weight='bold', arrows=True, arrowsize=20,
-                edge_color='#424242', width=[d['weight']*3 for (u, v, d) in G.edges(data=True)],
-                ax=ax)
-        ax.set_title("How Factors Connect", fontweight='bold')
+        # Dynamic edges based on active factors
+        edges = [
+            ("Weather", "Crop Yield", 0.7),
+            ("Trade Policy", "Market Access", 0.8),
+            ("Conflict", "Transport Cost", 0.6),
+            ("Crop Yield", f"{crop} Supply", 0.9),
+            ("Market Access", f"{crop} Supply", 0.85),
+            ("Transport Cost", f"{crop} Price", 0.5),
+            (f"{crop} Supply", f"{crop} Price", 0.95),
+            (f"{crop} Price", "Food Security", 0.75)
+        ]
+        
+        for source, target, strength in edges:
+            G.add_edge(source, target, weight=strength)
+        
+        pos = nx.spring_layout(G, seed=42, k=2.5)
+        
+        # Draw nodes with crop-specific color
+        node_colors = [theme['primary'] if crop in node or 'Supply' in node or 'Price' in node else '#64748b' 
+                       for node in G.nodes()]
+        
+        nx.draw_networkx_nodes(G, pos, node_color=node_colors, 
+                              node_size=3500, alpha=0.9, ax=ax)
+        nx.draw_networkx_labels(G, pos, font_size=9, font_color='white',
+                               font_weight='bold', ax=ax)
+        
+        # Draw edges with varying thickness
+        edge_weights = [d['weight']*4 for (u, v, d) in G.edges(data=True)]
+        nx.draw_networkx_edges(G, pos, width=edge_weights, 
+                              edge_color='#475569', alpha=0.6,
+                              arrows=True, arrowsize=20, ax=ax)
+        
+        ax.set_title(f"Causal Pathways: {crop} Market in {country}", 
+                    fontsize=12, fontweight='bold', pad=20)
+        ax.axis('off')
         st.pyplot(fig)
     
     with col2:
         st.markdown("""
-        **Main Findings:**
-        
-        1. **Biggest factor (35%)**: Export restrictions
-        2. **Second factor (25%)**: Drought reducing harvests
-        3. **Third factor (20%)**: Conflict increasing costs
-        4. **Our confidence**: 87% sure these are the real causes
-        """)
-    
-    # Simple breakdown
-    st.subheader("What Drove Prices Up?")
-    causes = pd.DataFrame({
-        'Factor': ['Export Restrictions', 'Drought', 'Conflict', 'Transport Costs', 'Other'],
-        'Impact (%)': [35, 25, 20, 15, 5]
-    })
-    fig, ax = plt.subplots(figsize=(10, 4))
-    colors = ['#D32F2F', '#FF6B6B', '#FFA726', '#FFCA28', '#E0E0E0']
-    ax.barh(causes['Factor'], causes['Impact (%)'], color=colors)
-    ax.set_xlabel('How much this pushed prices up (%)')
-    ax.grid(True, alpha=0.3, axis='x')
-    st.pyplot(fig)
+        <div style="background: #f8fafc; border-radius: 12px; padding: 1.25rem;">
+            <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.75rem;">How to Read</div>
+            <div style="font-size: 0.875rem; color: #64748b; line-height: 1.6;">
+                • <strong>Nodes</strong> = Market factors<br>
+                • <strong>Arrows</strong> = Causal influence<br>
+                • <strong>Thickness</strong> = Strength of effect<br><br>
+                <strong style="color: """ + theme['primary'] + """;">Colored nodes</strong> show 
+                your selected crop's specific pathway through the market system.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Report 2: What if we take action - SMALLER FONTS
-elif "What if we take action" in report_choice:
-    st.header(f"🔮 Testing Actions for {crop} in {country}")
-    st.markdown("*See what happens before you decide*")
+# VIEW 3: Scenario Comparison
+elif "Scenario Comparison" in report_choice:
+    st.markdown(f'<div class="section-header">Compare Intervention Scenarios for {crop}</div>', unsafe_allow_html=True)
     
-    # Get all scenarios for comparison
-    scenarios = {
-        'Do nothing': get_scenario_metrics(crop, country, "Do nothing (see what happens)"),
-        'Release reserves': get_scenario_metrics(crop, country, "Release grain reserves"),
-        'Fix trade routes': get_scenario_metrics(crop, country, "Fix trade routes"),
-        'Do both': get_scenario_metrics(crop, country, "Do both (reserves + routes)")
+    # Get all scenarios for this crop/country
+    all_scenarios = {
+        'Current Trajectory': get_scenario_metrics(crop, country, "Do nothing (see what happens)"),
+        'Release Reserves': get_scenario_metrics(crop, country, "Release grain reserves"),
+        'Improve Routes': get_scenario_metrics(crop, country, "Fix trade routes"),
+        'Combined Approach': get_scenario_metrics(crop, country, "Do both (reserves + routes)")
     }
     
-    # Compare options - SMALLER FONTS using custom HTML
-    st.subheader("Compare Options")
-    
+    # Scenario cards
+    st.markdown("**Select to compare:**")
     cols = st.columns(4)
-    option_names = list(scenarios.keys())
     
-    for i, (col, option_name) in enumerate(zip(cols, option_names)):
+    for i, (col, (name, metrics)) in enumerate(zip(cols, all_scenarios.items())):
+        is_active = name.replace('Current Trajectory', 'Do nothing').replace('Release Reserves', 'Release grain').replace('Improve Routes', 'Fix trade').replace('Combined Approach', 'Do both') in scenario
+        
         with col:
-            metrics = scenarios[option_name]
+            impact_color = '#ef4444' if metrics['price_drop'] == 0 else '#22c55e'
             st.markdown(f"""
-            <div style='font-size: 0.85rem; text-align: center; padding: 10px; background-color: #f8fafc; border-radius: 8px;'>
-                <strong>{option_name}</strong><br>
-                <span style='font-size: 0.9rem;'>Prices down {metrics['price_drop']}%</span><br>
-                <span style='font-size: 0.8rem; color: #666;'>Costs KES {metrics['cost']}M</span>
+            <div class="scenario-card {'active' if is_active else ''}" style="border-color: {impact_color if is_active else '#e2e8f0'};">
+                <div style="font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">{name}</div>
+                <div style="font-size: 2rem; font-weight: 700; color: {impact_color};">{metrics['price_drop']}%</div>
+                <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.75rem;">price impact</div>
+                <div style="font-size: 0.875rem; color: #374151;"><strong>KES {metrics['cost']}M</strong></div>
+                <div style="font-size: 0.75rem; color: #6b7280;">{metrics['people_helped']}M people helped</div>
+                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">{metrics['confidence']}% confidence</div>
             </div>
             """, unsafe_allow_html=True)
     
-    st.markdown("---")
-    
-    # Show price paths
-    st.subheader(f"{crop} Price Predictions for Next {months_ahead} Months")
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][:months_ahead]
-    
-    # Generate baseline based on current crop/country
-    base_price = data['market_price'].iloc[-1]
-    no_action_prices = [base_price * (1 + 0.02 * i + np.random.normal(0, 0.01)) for i in range(months_ahead)]
-    
-    fig, ax = plt.subplots(figsize=(12, 5))
-    colors = ['#D32F2F', '#FF9800', '#4CAF50', '#1976D2']
-    
-    for i, (option, metrics) in enumerate(scenarios.items()):
-        if option == 'Do nothing':
-            prices = no_action_prices
-        else:
-            drop = metrics['price_drop'] / 100
-            prices = [p * (1 - drop) for p in no_action_prices]
-        
-        ax.plot(months, prices, marker='o', linewidth=2.5, 
-                label=option, color=colors[i])
-    
-    crisis = base_price * 1.3
-    ax.axhline(y=crisis, color='red', linestyle='--', alpha=0.5, label='Crisis Level')
-    ax.fill_between(months, base_price * 0.8, crisis, alpha=0.1, color='green', label='Safe Zone')
-    ax.set_ylabel(f'Price (KES per {crop} bag)')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    st.pyplot(fig)
-    
-    # Recommendation based on selection
-    st.markdown("---")
-    st.subheader("Analysis of Your Selection")
-    
-    selected_metrics = scenarios.get("Do nothing" if "nothing" in action else 
-                                    "Release reserves" if "reserves" in action else
-                                    "Fix trade routes" if "routes" in action else
-                                    "Do both")
-    
-    left, right = st.columns([1, 1])
-    with left:
-        st.write(f"**Option: {action}**")
-        st.write(f"• Expected price drop: {selected_metrics['price_drop']}%")
-        st.write(f"• People helped: {selected_metrics['people_helped']:.1f} million")
-        st.write(f"• Implementation cost: KES {selected_metrics['cost']} million")
-        st.write(f"• Success probability: {selected_metrics['works']}%")
-    
-    with right:
-        st.write("**What this means:**")
-        st.write(selected_metrics['description'])
-        
-        if selected_metrics['price_drop'] > 20:
-            st.success("This is our recommended approach")
-        elif selected_metrics['price_drop'] > 10:
-            st.info("This is a good moderate option")
-        else:
-            st.warning("Consider stronger action")
-
-# Report 3: What's the best move
-elif "What's the best move" in report_choice:
-    st.header(f"🎯 Best Strategy for {crop} in {country}")
-    st.markdown("*Smart planning for the long term*")
-    
-    # Cost vs benefit chart
-    st.subheader("Best Value for Money")
-    
-    np.random.seed(42)
-    strategies = 50
-    costs = np.random.uniform(50, 400, strategies)
-    effectiveness = 85 - 0.15 * costs + np.random.normal(0, 5, strategies)
-    effectiveness = np.clip(effectiveness, 30, 95)
-    
-    # Find best options
-    good_deals = np.ones(strategies, dtype=bool)
-    for i in range(strategies):
-        for j in range(strategies):
-            if i != j:
-                if costs[j] <= costs[i] and effectiveness[j] >= effectiveness[i]:
-                    if costs[j] < costs[i] or effectiveness[j] > effectiveness[i]:
-                        good_deals[i] = False
-                        break
+    # Comparison chart
+    st.markdown('<div class="section-header">Projected Price Paths</div>', unsafe_allow_html=True)
     
     fig, ax = plt.subplots(figsize=(12, 6))
-    ax.scatter(costs[~good_deals], effectiveness[~good_deals], 
-               c='lightgray', s=50, alpha=0.5, label='Not the best value')
-    ax.scatter(costs[good_deals], effectiveness[good_deals], 
-               c='#1976D2', s=100, alpha=0.8, label='Best value options', 
-               edgecolors='black', linewidth=2)
     
-    # Highlight best for current context
-    best = get_scenario_metrics(crop, country, "Do both (reserves + routes)")
-    ax.scatter([best['cost']], [best['works']], c='#4CAF50', s=400, marker='*', 
-               edgecolors='black', linewidth=2, label='OUR PICK', zorder=10)
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][:months_ahead]
     
-    ax.set_xlabel('Cost (Million KES)')
-    ax.set_ylabel('How well it works (score)')
-    ax.legend()
+    for i, (name, scen_metrics) in enumerate(all_scenarios.items()):
+        future_dates, prices, impact = apply_scenario_impact(
+            data, 
+            name.replace('Current Trajectory', 'Do nothing (see what happens)')
+                .replace('Release Reserves', 'Release grain reserves')
+                .replace('Improve Routes', 'Fix trade routes')
+                .replace('Combined Approach', 'Do both (reserves + routes)'),
+            months_ahead
+        )
+        
+        color = ['#ef4444', '#f59e0b', '#3b82f6', '#059669'][i]
+        linewidth = 3 if name.replace('Current Trajectory', 'Do nothing').replace('Release Reserves', 'Release grain').replace('Improve Routes', 'Fix trade').replace('Combined Approach', 'Do both') in scenario else 2
+        alpha = 1.0 if name.replace('Current Trajectory', 'Do nothing').replace('Release Reserves', 'Release grain').replace('Improve Routes', 'Fix trade').replace('Combined Approach', 'Do both') in scenario else 0.6
+        
+        ax.plot(future_dates, prices, 
+                linewidth=linewidth, color=color, alpha=alpha,
+                marker='o', markersize=6 if linewidth == 3 else 4,
+                label=f"{name} ({scen_metrics['price_drop']}%)")
+    
+    ax.axhline(y=data['base_price'].iloc[0] * 1.3, color='#dc2626', linestyle='--', alpha=0.5, label='Crisis level')
+    
+    ax.set_ylabel(f'Projected Price (KES/{crop.lower()})', fontsize=11)
+    ax.legend(loc='best', framealpha=0.95)
     ax.grid(True, alpha=0.3)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    plt.tight_layout()
     st.pyplot(fig)
     
-    # Timeline
-    st.subheader("12-Month Implementation Plan")
+    # Selected scenario details
+    st.markdown('<div class="section-header">Your Selected Scenario</div>', unsafe_allow_html=True)
     
-    plan = pd.DataFrame({
-        'Phase': ['Connect data sources', 'Build prediction model', 'Test scenarios', 'Launch system'],
-        'When': ['Months 1-3', 'Months 3-6', 'Months 6-9', 'Months 9-12'],
-        'What we deliver': [
-            f'All {crop} data from {country} in one place',
-            f'Working tool for {crop} price predictions',
-            f'Tested with real {crop} market events',
-            f'Full decision support for {country}'
-        ]
-    })
+    cols = st.columns(3)
+    with cols[0]:
+        st.metric("Expected Price Reduction", f"{current_metrics['price_drop']}%")
+    with cols[1]:
+        st.metric("Implementation Cost", f"KES {current_metrics['cost']}M")
+    with cols[2]:
+        st.metric("People Protected", f"{current_metrics['people_helped']}M")
     
-    st.table(plan)
-    
-    # Budget
-    st.subheader("Recommended Budget: KES 500M")
-    
-    spending = pd.DataFrame({
-        'Activity': ['Manage reserves', 'Fix trade routes', 'Data systems', 'Training', 'Backup funds'],
-        'Percentage': [35, 30, 20, 10, 5],
-        'Amount (KES M)': [175, 150, 100, 50, 25]
-    })
-    
-    left, right = st.columns([1, 1])
-    with left:
-        fig, ax = plt.subplots(figsize=(8, 6))
-        colors = ['#1976D2', '#388E3C', '#F57C00', '#7B1FA2', '#616161']
-        ax.pie(spending['Percentage'], labels=spending['Activity'], 
-               autopct='%1.0f%%', colors=colors, startangle=90)
-        ax.set_title('Budget Split')
-        st.pyplot(fig)
-    
-    with right:
-        st.table(spending)
+    st.info(f"**{scenario}:** {current_metrics['description']}")
 
-# Report 4: How accurate are we
+# VIEW 4: Performance Tracking
 else:
-    st.header("📈 How Accurate Are Our Predictions?")
-    st.markdown("*Tracking our performance and improvements*")
+    st.markdown('<div class="section-header">Platform Performance & Accuracy</div>', unsafe_allow_html=True)
     
-    # Accuracy over time
-    st.subheader("Getting Better With Each Prediction")
+    # Model performance for this crop/country
+    st.markdown(f"**Tracking {crop} model accuracy in {country}**")
     
+    # Simulate improving accuracy over time
+    np.random.seed(hash(f"{crop}_{country}") % 2**32)
     history = pd.DataFrame({
         'Prediction #': range(1, 9),
-        'Error (%)': [20, 15, 18, 12, 10, 14, 11, 9],
-        'Confidence': [65, 70, 72, 78, 80, 82, 85, 88]
+        'Error (%)': [18, 14, 15, 11, 9, 10, 8, 7],
+        'Confidence': [68, 72, 75, 80, 83, 85, 87, 89]
     })
     
-    fig, ax = plt.subplots(figsize=(12, 5))
-    ax.plot(history['Prediction #'], history['Error (%)'], 
-            marker='o', linewidth=2.5, markersize=8, color='#D32F2F', label='How wrong we were')
-    ax.fill_between(history['Prediction #'], history['Error (%)'], 
-                    alpha=0.3, color='#D32F2F')
+    fig, ax1 = plt.subplots(figsize=(12, 5))
     
-    # Trend line
-    z = np.polyfit(history['Prediction #'], history['Error (%)'], 1)
-    p = np.poly1d(z)
-    ax.plot(history['Prediction #'], p(history['Prediction #']), 
-            "--", color='#1976D2', linewidth=2, label='Getting better')
+    color1 = '#ef4444'
+    ax1.set_xlabel('Prediction Number', fontsize=11)
+    ax1.set_ylabel('Prediction Error (%)', color=color1, fontsize=11)
+    ax1.plot(history['Prediction #'], history['Error (%)'], 
+            color=color1, marker='o', linewidth=2.5, markersize=8, label='Error rate')
+    ax1.fill_between(history['Prediction #'], history['Error (%)'], alpha=0.2, color=color1)
+    ax1.tick_params(axis='y', labelcolor=color1)
     
-    ax.set_xlabel('Number of predictions made')
-    ax.set_ylabel('Error (%)')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax2 = ax1.twinx()
+    color2 = '#059669'
+    ax2.set_ylabel('Model Confidence (%)', color=color2, fontsize=11)
+    ax2.plot(history['Prediction #'], history['Confidence'], 
+            color=color2, marker='s', linewidth=2.5, markersize=8, linestyle='--', label='Confidence')
+    ax2.tick_params(axis='y', labelcolor=color2)
+    ax2.set_ylim(60, 95)
+    
+    # Trend annotation
+    ax1.annotate('Learning from\ninterventions', 
+                xy=(6, 8), xytext=(4.5, 12),
+                arrowprops=dict(arrowstyle='->', color='#64748b'),
+                fontsize=9, color='#64748b', ha='center')
+    
+    fig.tight_layout()
     st.pyplot(fig)
     
     # Current stats
-    st.subheader("Current Performance")
+    cols = st.columns(4)
+    with cols[0]:
+        st.metric("Current Error Rate", "7.2%", "-10.8pp from start")
+    with cols[1]:
+        st.metric("Model Confidence", "89%", "+21pp improvement")
+    with cols[2]:
+        st.metric("Predictions Made", "24", "This quarter")
+    with cols[3]:
+        st.metric("Validation Status", "✓ Active", "Real-time monitoring")
     
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("Prediction Error", "9.1%", "Down 10.9%")
-    with c2:
-        st.metric("Confidence", "88%", "Up 23%")
-    with c3:
-        st.metric("Updates made", "24", "Ongoing")
-    with c4:
-        st.metric("Quality check", "PASSED", "Independent review")
+    # Learning insights
+    st.markdown('<div class="section-header">Key Learnings for {0} in {1}</div>'.format(crop, country), unsafe_allow_html=True)
     
-    # How we improved
-    st.subheader("How the System Learned")
-    st.markdown("""
-    **Starting point (Month 0):**
-    - Basic connections only
-    - 65% accuracy
-    - Simple supply and demand
+    learnings = {
+        "Maize": "Transport cost sensitivity is 2x higher than initially modeled. Conflict in key corridors has non-linear price effects.",
+        "Beans": "Export ban announcements create anticipatory price spikes 2-3 weeks before implementation. Early warning critical.",
+        "Wheat": "Climate correlation strongest in Rift Valley region. Satellite vegetation indices improve forecast accuracy by 15%."
+    }
     
-    **After 4 predictions:**
-    - Added policy and conflict factors
-    - 78% accuracy
-    - Better understanding
-    
-    **Now (Month 16):**
-    - Full picture of market drivers
-    - 88% accuracy
-    - Learns from each prediction
-    """)
-    
-    st.info(f"💡 **Key discovery for {country}**: We found that {crop} transport costs and local conflict are connected in ways we didn't expect. This improved our predictions by 15%.")
+    st.success(f"💡 **Insight:** {learnings.get(crop, 'Continuous model refinement improving accuracy.')}")
 
 # Footer
 st.markdown("---")
-st.caption(f"GreenScope Analytics | {crop} Market Intelligence for {country} | Built for EAGC")
+st.markdown(f"""
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; color: #64748b; font-size: 0.875rem;">
+    <div>
+        <strong>GreenScope Analytics</strong> | Market Intelligence Infrastructure
+    </div>
+    <div>
+        {crop} • {country} • {scenario} | v2.1.0
+    </div>
+</div>
+""", unsafe_allow_html=True)

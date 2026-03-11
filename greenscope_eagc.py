@@ -26,7 +26,7 @@ st.set_page_config(
 # Enhanced CSS for modern UI
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300   ;400;500;600;700&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
@@ -308,7 +308,7 @@ def create_market_data(crop="Maize", country="Kenya", seed=None, months=36):
         'base_price': base_price
     }), params
 
-# CRITICAL FIX: Scenario-aware data generation
+# CRITICAL FIX: Scenario-aware data generation - NOW FULLY DYNAMIC WITH months_ahead
 def apply_scenario_impact(data, scenario, months_ahead=6):
     """Apply scenario-specific impacts to price projections"""
     last_price = data['market_price'].iloc[-1]
@@ -344,11 +344,11 @@ def apply_scenario_impact(data, scenario, months_ahead=6):
     
     impact = scenario_impacts.get(scenario, scenario_impacts["Do nothing (see what happens)"])
     
-    # Generate future dates
+    # Generate future dates - DYNAMIC based on months_ahead
     future_dates = pd.date_range(start=last_date + pd.DateOffset(months=1), periods=months_ahead, freq='M')
     
-    # Generate scenario-specific price path
-    np.random.seed(hash(scenario) % 2**32)
+    # Generate scenario-specific price path - DYNAMIC length based on months_ahead
+    np.random.seed(hash(f"{scenario}_{months_ahead}") % 2**32)  # Seed includes months_ahead for reproducibility
     prices = []
     current_price = last_price * impact['price_modifier']
     
@@ -460,11 +460,23 @@ with st.sidebar:
         help="See how different actions affect future prices"
     )
     
+    # DYNAMIC FORECAST MONTHS SLIDER
     months_ahead = st.slider(
         "Forecast Months", 
-        3, 12, 6,
-        help="How far ahead to project"
+        min_value=3, 
+        max_value=12, 
+        value=6,
+        step=1,
+        help="How far ahead to project (3-12 months)"
     )
+    
+    # Show current selection
+    st.markdown(f"""
+    <div style="background: #eff6ff; border-radius: 6px; padding: 8px; margin-top: 8px; border: 1px solid #bfdbfe;">
+        <div style="font-size: 0.75rem; color: #1e40af; font-weight: 600;">FORECAST PERIOD</div>
+        <div style="font-size: 1rem; color: #1e2937; font-weight: 700;">{months_ahead} months</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -475,7 +487,8 @@ with st.sidebar:
         <div style="font-size: 0.875rem; color: #1f2937; margin-top: 4px;">
             📍 {country}<br>
             🌾 {crop}<br>
-            📊 {scenario}
+            📊 {scenario}<br>
+            📅 {months_ahead} month forecast
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -558,6 +571,68 @@ if "Market Overview" in report_choice:
         </div>
         """, unsafe_allow_html=True)
     
+    # NEW: Dynamic Scenario Impact Section - Shows metrics for selected scenario
+    if scenario != "Do nothing (see what happens)":
+        st.markdown(f'<div class="section-header">Selected Scenario Impact ({months_ahead}-Month Forecast)</div>', unsafe_allow_html=True)
+        
+        # Calculate dynamic price reduction based on projection - USING DYNAMIC months_ahead
+        future_dates, future_prices, impact = apply_scenario_impact(data, scenario, months_ahead)
+        price_reduction = (1 - future_prices[0] / data['market_price'].iloc[-1]) * 100
+        
+        # Calculate end-of-period metrics
+        end_price = future_prices[-1]
+        total_change = ((end_price / current_price) - 1) * 100
+        
+        scen_cols = st.columns(4)
+        
+        with scen_cols[0]:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #059669;">
+                <div class="metric-label">Expected Price Drop</div>
+                <div class="metric-value" style="color: #059669;">{price_reduction:.1f}%</div>
+                <div class="metric-delta" style="color: #64748b;">First month impact</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with scen_cols[1]:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #3b82f6;">
+                <div class="metric-label">Implementation Cost</div>
+                <div class="metric-value" style="color: #1e293b;">KES {current_metrics['cost']}M</div>
+                <div class="metric-delta" style="color: #64748b;">{country}-specific estimate</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with scen_cols[2]:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #8b5cf6;">
+                <div class="metric-label">People Protected</div>
+                <div class="metric-value" style="color: #1e293b;">{current_metrics['people_helped']}M</div>
+                <div class="metric-delta" style="color: #64748b;">Over {months_ahead} months</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with scen_cols[3]:
+            conf_color = "#16a34a" if current_metrics['confidence'] >= 85 else "#f59e0b" if current_metrics['confidence'] >= 75 else "#ef4444"
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid {conf_color};">
+                <div class="metric-label">Confidence Level</div>
+                <div class="metric-value" style="color: {conf_color};">{current_metrics['confidence']}%</div>
+                <div class="metric-delta" style="color: #64748b;">Model certainty</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Scenario description and timeline - DYNAMIC based on months_ahead
+        st.markdown(f"""
+        <div class="insight-box">
+            <strong>Active Scenario: {scenario}</strong> ({months_ahead}-month projection)<br>
+            {current_metrics['description']}<br>
+            <strong>Timeline:</strong> {current_metrics['timeline']} | 
+            <strong>Projected price path:</strong> KES {future_prices[0]:,.0f} (Month 1) → KES {end_price:,.0f} (Month {months_ahead}) | 
+            <strong>Total change:</strong> {total_change:+.1f}%
+        </div>
+        """, unsafe_allow_html=True)
+    
     # Alerts section
     alerts = []
     if price_change > 15:
@@ -569,6 +644,10 @@ if "Market Overview" in report_choice:
     if data['export_stop'].iloc[-3:].mean() > 0.4:
         alerts.append(("Trade Disruption", "Export restrictions affecting supply", "warning"))
     
+    # Add scenario-specific alerts
+    if scenario != "Do nothing (see what happens)" and current_metrics['confidence'] < 80:
+        alerts.append(("Confidence Warning", f"{scenario} has {current_metrics['confidence']}% confidence—consider additional data", "warning"))
+    
     if alerts:
         st.markdown('<div class="section-header">Active Alerts</div>', unsafe_allow_html=True)
         for title, message, level in alerts[:3]:
@@ -579,8 +658,8 @@ if "Market Overview" in report_choice:
     else:
         st.success("✓ All market indicators within normal parameters")
     
-    # Price chart with scenario overlay
-    st.markdown('<div class="section-header">Price Trajectory & Scenario Impact</div>', unsafe_allow_html=True)
+    # Price chart with scenario overlay - DYNAMIC months_ahead
+    st.markdown(f'<div class="section-header">Price Trajectory & {months_ahead}-Month Scenario Impact</div>', unsafe_allow_html=True)
     
     fig, ax = plt.subplots(figsize=(12, 5))
     
@@ -595,13 +674,21 @@ if "Market Overview" in report_choice:
     ax.plot(data['date'], p(range(len(data))), 
             "--", color=theme['accent'], linewidth=1.5, alpha=0.6, label='Trend')
     
-    # Scenario projection
+    # Scenario projection - DYNAMIC months_ahead
     future_dates, future_prices, impact = apply_scenario_impact(data, scenario, months_ahead)
     
+    # Dynamic color based on scenario
+    if 'both' in scenario:
+        line_color = '#059669'  # Green for combined
+    elif scenario == "Do nothing (see what happens)":
+        line_color = '#ef4444'  # Red for do nothing
+    else:
+        line_color = '#3b82f6'  # Blue for single interventions
+    
     ax.plot(future_dates, future_prices, 
-            linewidth=3, color='#059669' if 'both' in scenario else '#3b82f6' if scenario != "Do nothing (see what happens)" else '#ef4444',
+            linewidth=3, color=line_color,
             linestyle='--', marker='o', markersize=6,
-            label=f'Scenario: {scenario}')
+            label=f'{scenario} ({months_ahead} mo)')
     
     # Reference lines
     base_price = data['base_price'].iloc[0]
@@ -622,21 +709,40 @@ if "Market Overview" in report_choice:
     plt.tight_layout()
     st.pyplot(fig)
     
-    # Scenario impact summary
+    # Scenario comparison mini-table - DYNAMIC
     if scenario != "Do nothing (see what happens)":
-        price_reduction = (1 - future_prices[0] / data['market_price'].iloc[-1]) * 100
+        # Get metrics for all scenarios for comparison
+        all_metrics = {
+            "Do nothing": get_scenario_metrics(crop, country, "Do nothing (see what happens)"),
+            "Selected": current_metrics
+        }
+        
         st.markdown(f"""
-        <div class="insight-box">
-            <strong>Scenario Impact: {scenario}</strong><br>
-            Projected price reduction: <strong>{price_reduction:.1f}%</strong> in first month<br>
-            {impact['description']}<br>
-            Confidence: {current_metrics['confidence']}% | Timeline: {current_metrics['timeline']}
+        <div style="background: #f8fafc; border-radius: 8px; padding: 12px; margin-top: 1rem;">
+            <strong>Scenario Comparison for {crop} in {country} ({months_ahead}-month horizon)</strong><br>
+            <table style="width: 100%; font-size: 0.875rem; margin-top: 8px;">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 8px 0;"><strong>Do Nothing</strong></td>
+                    <td style="padding: 8px 0; text-align: right;">0% price drop</td>
+                    <td style="padding: 8px 0; text-align: right;">KES 0M cost</td>
+                    <td style="padding: 8px 0; text-align: right;">0M helped</td>
+                </tr>
+                <tr style="background: #f0fdf4; border-left: 3px solid #059669;">
+                    <td style="padding: 8px 0;"><strong>{scenario}</strong> (Selected)</td>
+                    <td style="padding: 8px 0; text-align: right; color: #059669; font-weight: 600;">{current_metrics['price_drop']}% drop</td>
+                    <td style="padding: 8px 0; text-align: right;">KES {current_metrics['cost']}M</td>
+                    <td style="padding: 8px 0; text-align: right;">{current_metrics['people_helped']}M helped</td>
+                </tr>
+            </table>
         </div>
         """, unsafe_allow_html=True)
 
 # VIEW 2: Price Drivers
 elif "Price Drivers" in report_choice:
     st.markdown(f'<div class="section-header">What&apos;s Driving {crop} Prices in {country}?</div>', unsafe_allow_html=True)
+    
+    # Show current forecast setting
+    st.info(f"📅 Current forecast setting: **{months_ahead} months** (adjust in sidebar)")
     
     # Dynamic causal factors based on data
     factors = []
@@ -737,7 +843,18 @@ elif "Price Drivers" in report_choice:
 elif "Scenario Comparison" in report_choice:
     st.markdown(f'<div class="section-header">Compare Intervention Scenarios for {crop}</div>', unsafe_allow_html=True)
     
-    # Get all scenarios for this crop/country
+    # Show current forecast setting prominently
+    st.markdown(f"""
+    <div style="background: #eff6ff; border-radius: 8px; padding: 12px; margin-bottom: 1rem; border: 1px solid #bfdbfe;">
+        <div style="font-size: 0.875rem; color: #1e40af;">
+            <strong>Forecast Horizon:</strong> {months_ahead} months | 
+            <strong>Country:</strong> {country} | 
+            <strong>Crop:</strong> {crop}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Get all scenarios for this crop/country - DYNAMICALLY CALCULATED
     all_scenarios = {
         'Current Trajectory': get_scenario_metrics(crop, country, "Do nothing (see what happens)"),
         'Release Reserves': get_scenario_metrics(crop, country, "Release grain reserves"),
@@ -765,12 +882,13 @@ elif "Scenario Comparison" in report_choice:
             </div>
             """, unsafe_allow_html=True)
     
-    # Comparison chart
-    st.markdown('<div class="section-header">Projected Price Paths</div>', unsafe_allow_html=True)
+    # Comparison chart - DYNAMIC months_ahead
+    st.markdown(f'<div class="section-header">Projected Price Paths ({months_ahead} Months)</div>', unsafe_allow_html=True)
     
     fig, ax = plt.subplots(figsize=(12, 6))
     
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][:months_ahead]
+    # DYNAMIC month labels based on months_ahead
+    month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][:months_ahead]
     
     for i, (name, scen_metrics) in enumerate(all_scenarios.items()):
         future_dates, prices, impact = apply_scenario_impact(
@@ -779,7 +897,7 @@ elif "Scenario Comparison" in report_choice:
                 .replace('Release Reserves', 'Release grain reserves')
                 .replace('Improve Routes', 'Fix trade routes')
                 .replace('Combined Approach', 'Do both (reserves + routes)'),
-            months_ahead
+            months_ahead  # DYNAMIC
         )
         
         color = ['#ef4444', '#f59e0b', '#3b82f6', '#059669'][i]
@@ -794,6 +912,7 @@ elif "Scenario Comparison" in report_choice:
     ax.axhline(y=data['base_price'].iloc[0] * 1.3, color='#dc2626', linestyle='--', alpha=0.5, label='Crisis level')
     
     ax.set_ylabel(f'Projected Price (KES/{crop.lower()})', fontsize=11)
+    ax.set_xlabel(f'Months Ahead ({months_ahead}-month horizon)', fontsize=11)
     ax.legend(loc='best', framealpha=0.95)
     ax.grid(True, alpha=0.3)
     ax.spines['top'].set_visible(False)
@@ -802,8 +921,8 @@ elif "Scenario Comparison" in report_choice:
     plt.tight_layout()
     st.pyplot(fig)
     
-    # Selected scenario details
-    st.markdown('<div class="section-header">Your Selected Scenario</div>', unsafe_allow_html=True)
+    # Selected scenario details - DYNAMICALLY UPDATED
+    st.markdown(f'<div class="section-header">Your Selected Scenario ({months_ahead}-Month Horizon)</div>', unsafe_allow_html=True)
     
     cols = st.columns(3)
     with cols[0]:
@@ -813,11 +932,14 @@ elif "Scenario Comparison" in report_choice:
     with cols[2]:
         st.metric("People Protected", f"{current_metrics['people_helped']}M")
     
-    st.info(f"**{scenario}:** {current_metrics['description']}")
+    st.info(f"**{scenario}** ({months_ahead}-month forecast): {current_metrics['description']}")
 
 # VIEW 4: Performance Tracking
 else:
     st.markdown('<div class="section-header">Platform Performance & Accuracy</div>', unsafe_allow_html=True)
+    
+    # Show current forecast setting
+    st.info(f"📅 Current forecast setting: **{months_ahead} months** | Model performance tracked across all forecast horizons")
     
     # Model performance for this crop/country
     st.markdown(f"**Tracking {crop} model accuracy in {country}**")
@@ -864,7 +986,7 @@ else:
     with cols[1]:
         st.metric("Model Confidence", "89%", "+21pp improvement")
     with cols[2]:
-        st.metric("Predictions Made", "24", "This quarter")
+        st.metric("Predictions Made", "24", f"This quarter ({months_ahead}mo horizon)")
     with cols[3]:
         st.metric("Validation Status", "✓ Active", "Real-time monitoring")
     
@@ -879,7 +1001,7 @@ else:
     
     st.success(f"💡 **Insight:** {learnings.get(crop, 'Continuous model refinement improving accuracy.')}")
 
-# Footer
+# Footer - DYNAMIC months_ahead display
 st.markdown("---")
 st.markdown(f"""
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; color: #64748b; font-size: 0.875rem;">
@@ -887,7 +1009,7 @@ st.markdown(f"""
         <strong>GreenScope Analytics</strong> | Market Intelligence Infrastructure
     </div>
     <div>
-        {crop} • {country} • {scenario} | v2.1.0
+        {crop} • {country} • {scenario} • {months_ahead}mo forecast | v2.1.0
     </div>
 </div>
 """, unsafe_allow_html=True)
